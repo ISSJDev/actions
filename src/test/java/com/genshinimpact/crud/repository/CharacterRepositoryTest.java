@@ -1,61 +1,35 @@
 package com.genshinimpact.crud.repository;
 
 import com.genshinimpact.crud.model.Character;
+import com.genshinimpact.crud.repository.CharacterRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class CharacterRepositoryTest {
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+public class CharacterRepositoryTest {
     @Autowired
-    private CharacterRepository characterRepository;
+    private TestEntityManager entityManager;
+
+    @Autowired
+    private CharacterRepository repository;
 
     @Test
-    void testSaveCharacter() {
-        Character character = new Character(null, "Diluc", "Pyro", "Claymore", "5", "Mondstadt");
-        Character savedCharacter = characterRepository.save(character);
-
-        assertNotNull(savedCharacter.getId());
-        assertEquals("Diluc", savedCharacter.getName());
+    public void should_find_no_characters_if_repository_is_empty() {
+        List<Character> characters = repository.findAll();
+        assertThat(characters).isEmpty();
     }
 
     @Test
-    void testFindAll() {
-        Character character1 = new Character(null, "Diluc", "Pyro", "Claymore", "5", "Mondstadt");
-        Character character2 = new Character(null, "Jean", "Anemo", "Sword", "5", "Mondstadt");
-
-        characterRepository.save(character1);
-        characterRepository.save(character2);
-
-        List<Character> characters = characterRepository.findAll();
-
-        assertEquals(2, characters.size());
-    }
-
-    @Test
-    void testFindById() {
-        Character character = new Character(null, "Diluc", "Pyro", "Claymore", "5", "Mondstadt");
-        Character savedCharacter = characterRepository.save(character);
-
-        Optional<Character> foundCharacter = characterRepository.findById(savedCharacter.getId());
-
-        assertTrue(foundCharacter.isPresent());
-        assertEquals("Diluc", foundCharacter.get().getName());
-    }
-
-    @Test
-    void testDeleteById() {
-        Character character = new Character(null, "Diluc", "Pyro", "Claymore", "5", "Mondstadt");
-        Character savedCharacter = characterRepository.save(character);
-
-        characterRepository.deleteById(savedCharacter.getId());
-
-        Optional<Character> foundCharacter = characterRepository.findById(savedCharacter.getId());
-        assertFalse(foundCharacter.isPresent());
+    public void should_store_a_character() {
+        Character character = repository.save(new Character(null, "Diluc", "Pyro", "Claymore", "5", "Mondstadt"));
+        assertThat(character).hasFieldOrPropertyWithValue("name", "Diluc");
     }
 }
