@@ -4,7 +4,6 @@ import com.genshinimpact.crud.dto.CharacterDTO;
 import com.genshinimpact.crud.exception.CharacterNotFoundException;
 import com.genshinimpact.crud.model.Character;
 import com.genshinimpact.crud.repository.CharacterRepository;
-import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +11,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CharacterServiceImpl implements CharacterService {
     private final CharacterRepository characterRepository;
     private final ModelMapper modelMapper;
+
+    public CharacterServiceImpl(CharacterRepository characterRepository, ModelMapper modelMapper) {
+        this.characterRepository = characterRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public List<CharacterDTO> getAllCharacters() {
