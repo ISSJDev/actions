@@ -97,9 +97,15 @@ class CharacterServiceTest {
     @Test
     void updateCharacter() {
         // Arrange
-        when(characterRepository.findById(1)).thenReturn(Optional.of(character));
-        when(characterRepository.save(character)).thenReturn(character);
-        when(modelMapper.map(character, CharacterDTO.class)).thenReturn(characterDTO);
+        Character existingCharacter = new Character(1, "Old Name", "Old Element", "Old Weapon", "4", "Old Region");
+        Character updatedCharacter = new Character(1, "Diluc", "Pyro", "Claymore", "5", "Mondstadt");
+
+        when(characterRepository.findById(1)).thenReturn(Optional.of(existingCharacter));
+        when(characterRepository.save(any(Character.class))).thenReturn(updatedCharacter);
+
+        // Configura ambos os mapeamentos necessários
+        when(modelMapper.map(characterDTO, Character.class)).thenReturn(updatedCharacter);
+        when(modelMapper.map(updatedCharacter, CharacterDTO.class)).thenReturn(characterDTO);
 
         // Act
         CharacterDTO result = characterService.updateCharacter(1, characterDTO);
@@ -107,7 +113,9 @@ class CharacterServiceTest {
         // Assert
         assertEquals(characterDTO, result);
         verify(characterRepository, times(1)).findById(1);
-        verify(characterRepository, times(1)).save(character);
+        verify(characterRepository, times(1)).save(existingCharacter);
+        verify(modelMapper, times(1)).map(characterDTO, Character.class);
+        verify(modelMapper, times(1)).map(updatedCharacter, CharacterDTO.class);
     }
 
     @Test
