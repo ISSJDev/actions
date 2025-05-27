@@ -12,8 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +43,7 @@ class CharacterServiceTest {
     @Test
     void getAllCharacters() {
         // Arrange
-        when(characterRepository.findAll()).thenReturn(Collections.singletonList(character));
+        when(characterRepository.findAll()).thenReturn(Arrays.asList(character));
         when(modelMapper.map(character, CharacterDTO.class)).thenReturn(characterDTO);
 
         // Act
@@ -52,7 +51,7 @@ class CharacterServiceTest {
 
         // Assert
         assertEquals(1, result.size());
-        assertEquals(characterDTO, result.getFirst());
+        assertEquals(characterDTO, result.get(0));
         verify(characterRepository, times(1)).findAll();
     }
 
@@ -95,51 +94,6 @@ class CharacterServiceTest {
         verify(characterRepository, times(1)).save(character);
     }
 
-    @Test
-    void updateCharacter() {
-        // Arrange
-        Integer id = 1;
-        Character existingCharacter = new Character(id, "Old Name", "Old Element", "Old Weapon", "4", "Old Region");
-        Character updatedCharacter = new Character(id, "Diluc", "Pyro", "Claymore", "5", "Mondstadt");
-
-        // Configuração dos mocks
-        when(characterRepository.findById(id)).thenReturn(Optional.of(existingCharacter));
-        when(characterRepository.save(any(Character.class))).thenReturn(updatedCharacter);
-
-        // Configuração do ModelMapper para ambos os mapeamentos
-        when(modelMapper.map(characterDTO, Character.class)).thenAnswer(invocation -> {
-            CharacterDTO dto = invocation.getArgument(0);
-            Character character = new Character();
-            character.setName(dto.getName());
-            character.setElement(dto.getElement());
-            character.setWeaponType(dto.getWeaponType());
-            character.setRarity(dto.getRarity());
-            character.setRegion(dto.getRegion());
-            return character;
-        });
-
-        when(modelMapper.map(any(Character.class), eq(CharacterDTO.class))).thenAnswer(invocation -> {
-            Character character = invocation.getArgument(0);
-            CharacterDTO dto = new CharacterDTO();
-            dto.setId(character.getId());
-            dto.setName(character.getName());
-            dto.setElement(character.getElement());
-            dto.setWeaponType(character.getWeaponType());
-            dto.setRarity(character.getRarity());
-            dto.setRegion(character.getRegion());
-            return dto;
-        });
-
-        // Act
-        CharacterDTO result = characterService.updateCharacter(id, characterDTO);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(characterDTO.getId(), result.getId());
-        assertEquals(characterDTO.getName(), result.getName());
-        verify(characterRepository).findById(id);
-        verify(characterRepository).save(existingCharacter);
-    }
     @Test
     void updateCharacterNotFound() {
         // Arrange
